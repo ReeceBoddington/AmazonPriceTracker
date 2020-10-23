@@ -1,23 +1,27 @@
-import requests, os, time#, sqlite3
+import requests
+import os
+import time  # , sqlite3
 from bs4 import BeautifulSoup
-#from sqlite3 import Error
+# from sqlite3 import Error
 
 HEADERS = ({'User-Agent':
             'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
             'Accept-Language': 'en-US, en;q=0.5'})
 
-#connection = None
-#global db_connection_status
+# connection = None
+# global db_connection_status
 #
-#try:
+# try:
 #    connection = sqlite3.connect("database.db")
 #    db_connection_status = True
-#except Error as e:
+# except Error as e:
 #    db_connection_status = False
+
 
 def clear():
     clear = lambda: os.system('cls')
     clear()
+
 
 def setupCheck():
     setup_file = open("setup.txt", "r")
@@ -25,30 +29,33 @@ def setupCheck():
     setup_file.close()
     return setup_status
 
+
 def setup(
-    #c
-    ):
+    # c
+):
     setup_file = open("setup.txt", "w")
     setup_file.write("yes")
     setup_file.close()
-    #c.execute("""CREATE TABLE products (
+    # c.execute("""CREATE TABLE products (
     #             name text,
     #             price float
     #             )""")
-    #connection.commit()
+    # connection.commit()
+
 
 def title():
     print("Amazon Price Checker")
     print(
-        #"Database Connected: ",db_connection_status,
+        # "Database Connected: ",db_connection_status,
         "\n")
+
 
 def productLookup(HEADERS):
     clear()
     title()
     URL = input("Amazon URL: ")
-    page = requests.get(URL,headers=HEADERS)
-    soup = BeautifulSoup(page.content,"lxml")
+    page = requests.get(URL, headers=HEADERS)
+    soup = BeautifulSoup(page.content, "lxml")
 
     name = "Name could not be found"
     price = "Price could not be found"
@@ -78,9 +85,9 @@ def productLookup(HEADERS):
             except:
                 pass
 
-    return name, price 
+    return name, price
 
-#def newTrack(HEADERS,c):
+# def newTrack(HEADERS,c):
 #    clear()
 #    title()
 #    name, price = productLookup(HEADERS)
@@ -91,12 +98,12 @@ def productLookup(HEADERS):
 
 
 def main(HEADERS
-    #,c
-    ):
+         # ,c
+         ):
     clear()
     title()
     print("A) Price Lookup (from URL)")
-    #print("B) Start Tracking Product (from URL)")
+    # print("B) Start Tracking Product (from URL)")
     print("\n")
     mode = input("Mode Select: ")
     mode = mode.upper()
@@ -104,26 +111,27 @@ def main(HEADERS
         name, price = productLookup(HEADERS)
         clear()
         title()
-        print("Product:\t",name)
-        print("Price:\t\t",price)
+        print("Product:\t", name)
+        print("Price:\t\t", price)
         time.sleep(2)
-    #elif mode == "B":
-        #c = newTrack(HEADERS,c)
+    # elif mode == "B":
+        # c = newTrack(HEADERS,c)
     else:
         clear()
         print("Invalid Mode Selection")
         time.sleep(2)
 
+
 while True:
     setup_check = setupCheck()
-    #c = connection.cursor()
+    # c = connection.cursor()
     if setup_check == "yes":
         pass
     elif setup_check == "":
         setup(
-            #c
-            )
-    main(HEADERS,
-        #c
+            # c
         )
-    #connection.commit
+    main(HEADERS,
+         # c
+         )
+    # connection.commit
