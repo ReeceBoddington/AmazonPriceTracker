@@ -1,21 +1,11 @@
 import requests
 import os
-import time  # , sqlite3
+import time
 from bs4 import BeautifulSoup
-# from sqlite3 import Error
 
 HEADERS = ({'User-Agent':
             'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
             'Accept-Language': 'en-US, en;q=0.5'})
-
-# connection = None
-# global db_connection_status
-#
-# try:
-#    connection = sqlite3.connect("database.db")
-#    db_connection_status = True
-# except Error as e:
-#    db_connection_status = False
 
 
 def clear():
@@ -30,24 +20,15 @@ def setupCheck():
     return setup_status
 
 
-def setup(
-    # c
-):
+def setup():
     setup_file = open("setup.txt", "w")
     setup_file.write("yes")
     setup_file.close()
-    # c.execute("""CREATE TABLE products (
-    #             name text,
-    #             price float
-    #             )""")
-    # connection.commit()
 
 
 def title():
     print("Amazon Price Checker")
-    print(
-        # "Database Connected: ",db_connection_status,
-        "\n")
+    print("\n")
 
 
 def productLookup(HEADERS):
@@ -87,23 +68,11 @@ def productLookup(HEADERS):
 
     return name, price
 
-# def newTrack(HEADERS,c):
-#    clear()
-#    title()
-#    name, price = productLookup(HEADERS)
-#
-#    c.execute("INSERT INTO products (name,price) values (?,?)",(name,price))
-#
-#    return c
 
-
-def main(HEADERS
-         # ,c
-         ):
+def main(HEADERS):
     clear()
     title()
     print("A) Price Lookup (from URL)")
-    # print("B) Start Tracking Product (from URL)")
     print("\n")
     mode = input("Mode Select: ")
     mode = mode.upper()
@@ -114,8 +83,6 @@ def main(HEADERS
         print("Product:\t", name)
         print("Price:\t\t", price)
         time.sleep(2)
-    # elif mode == "B":
-        # c = newTrack(HEADERS,c)
     else:
         clear()
         print("Invalid Mode Selection")
@@ -124,14 +91,8 @@ def main(HEADERS
 
 while True:
     setup_check = setupCheck()
-    # c = connection.cursor()
     if setup_check == "yes":
         pass
     elif setup_check == "":
-        setup(
-            # c
-        )
-    main(HEADERS,
-         # c
-         )
-    # connection.commit
+        setup()
+    main(HEADERS,)
