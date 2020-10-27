@@ -14,19 +14,6 @@ def clear():
     clear()
 
 
-def setupCheck():
-    setup_file = open("setup.txt", "r")
-    setup_status = setup_file.read()
-    setup_file.close()
-    return setup_status
-
-
-def setup():
-    setup_file = open("setup.txt", "w")
-    setup_file.write("yes")
-    setup_file.close()
-
-
 def title():
     print("Amazon Price Checker")
     print("\n")
@@ -131,7 +118,7 @@ def main(HEADERS):
     title()
     print("A) Price Lookup (from URL)")
     print("B) Start Price Tracking (from URL)")
-    print("C) Auto Update Prices")
+    print("C) Update Prices (from saved)")
     print("\n")
     mode = input("Mode Select: ")
     mode = mode.upper()
@@ -162,9 +149,4 @@ def main(HEADERS):
 
 
 while True:
-    setup_check = setupCheck()
-    if setup_check == "yes":
-        pass
-    elif setup_check == "":
-        setup()
     main(HEADERS)
