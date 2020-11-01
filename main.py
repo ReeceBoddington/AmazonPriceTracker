@@ -15,16 +15,15 @@ def clear():
 
 
 def title():
-    print("Amazon Price Checker")
-    print("\n")
+    print("Amazon Price Checker\n")
 
 
-def productLookup(HEADERS, URL):
-    page = requests.get(URL, headers=HEADERS)
+def productLookup(HEADERS, url):
+    now = datetime.now()
+    dt = now.strftime("%Y-%m-%d-%H-%M-%S")
+
+    page = requests.get(url, headers=HEADERS)
     soup = BeautifulSoup(page.content, "lxml")
-
-    name = "Name could not be found"
-    price = "Price could not be found"
 
     try:
         name = soup.find(id='productTitle').get_Text()
@@ -37,17 +36,8 @@ def productLookup(HEADERS, URL):
                 name = name.string
                 name = name.split(": Amazon",)
                 name = name[0]
-                name = name.replace("\\", "")
-                name = name.replace("/", "")
-                name = name.replace(":", "")
-                name = name.replace("*", "")
-                name = name.replace("?", "")
-                name = name.replace("\"", "")
-                name = name.replace("<", "")
-                name = name.replace(">", "")
-                name = name.replace("|", "")
             except:
-                pass
+                name = "Name could not be parsed"
 
     try:
         price = soup.find(id='priceblock_ourprice').get_text()
@@ -61,92 +51,149 @@ def productLookup(HEADERS, URL):
                 try:
                     price = soup.find(class_="a-size-medium a-color-price offer-price a-text-normal").get_text()
                 except:
-                    pass
+                    price = "Price could not be parsed"
 
-    url = str(URL)
-    name = str(name)
-    price = str(price)
-
-    return url, name, price
+    return name, price, dt
 
 
-def newTrack(url, name, price):
-    now = datetime.now()
-    dt = now.strftime("%Y-%m-%d-%H-%M-%S")
-    if os.path.isfile("products/" + name + ".txt") == False:
-        file = open("products/" + name + ".txt", "a")
-        file.write(url + "\n")
-        file.write(dt + "-" + price + "\n")
-        file.close()
-    else:
-        updatePrice(name, price, dt)
-
-
-def updatePrice(name, price, dt):
-    file = open("products/" + name + ".txt", "r")
-    lines = file.read().splitlines()
-    lastline = lines[-1]
-    line = lastline.split("-")
-    lastprice = line[6]
-
-    if price != lastprice:
-        file = open("products/" + name + ".txt", "a")
-        file.write(dt + "-" + price + "\n")
-        file.close()
-    else:
-        pass
-
-    return lastprice
-
-
-def autoUpdate(HEADERS):
-    now = datetime.now()
-    dt = now.strftime("%Y-%m-%d-%H-%M-%S")
-    products = os.scandir("products/")
-    print("Previous Price\tCurrent Price\tProduct\n")
-    for product in products:
-        file = open(product)
-        URL = file.readline()
-        url, name, price = productLookup(HEADERS, URL)
-        lastprice = updatePrice(name, price, dt)
-        print(lastprice + "\t\t" + price + "\t\t" + name + "\n")
-    time.sleep(2)
-
-
-def main(HEADERS):
+def startTracking(HEADERS):
     clear()
     title()
-    print("A) Price Lookup (from URL)")
-    print("B) Start Price Tracking (from URL)")
-    print("C) Update Prices (from saved)")
-    print("\n")
-    mode = input("Mode Select: ")
+    url = input("Amazon URL: ")
+    check = 0
+    products = os.scandir("products/")
+    for product in products:
+        file = open("products/" + product.name, "r")
+        lines = file.read().splitlines()
+        firstline = lines[0]
+        if url == firstline:
+            check = 1
+        else:
+            pass
+    if check == 1:
+        clear()
+        title()
+        print("This product is already being tracked.")
+        time.sleep(1)
+        home(HEADERS)
+    else:
+        name, price, dt = productLookup(HEADERS, url)
+        clear()
+        title()
+        name = input(name + "\n\n" + "Please choose a suitable name: ")
+        name = name.replace("\\", "")
+        name = name.replace("/", "")
+        name = name.replace(":", "")
+        name = name.replace("*", "")
+        name = name.replace("?", "")
+        name = name.replace("\"", "")
+        name = name.replace("<", "")
+        name = name.replace(">", "")
+        name = name.replace("|", "")
+        file = open("products/" + name + ".txt", "a")
+        file.write(url + "\n" + dt + "-" + price + "\n")
+        file.close()
+        clear()
+        title()
+        print("\n" + name + " is now being tracked with a starting price of " + price)
+        home(HEADERS)
+
+
+def updatePrices(HEADERS):
+    clear()
+    title()
+    print("Updating product prices, please wait (this may take a while depending on how many products you have saved and your internet speed.)")
+    products = os.scandir("products/")
+    for product in products:
+        file = open(product, "r")
+        lines = file.read().splitlines()
+        url = lines[0]
+        name, price, dt = productLookup(HEADERS, url)
+        lastline = lines[-1]
+        line = lastline.split("-")
+        lastprice = line[6]
+        if price != lastprice:
+            file = open(product, "a")
+            file.write(dt + "-" + price + "\n")
+            file.close()
+            price = price.replace("£", "")
+            price = float(price)
+            lastprice = lastprice.replace("£", "")
+            lastprice = float(lastprice)
+            name = product.name.split(".txt")
+            name = name[0]
+            if price < lastprice:
+                pricechange = lastprice - price
+                percentage = (pricechange / lastprice) * 100
+                percentage = round(percentage)
+                print(name, "has dropped from", lastprice, "to", price, "(", percentage, "%)")
+            elif price > lastprice:
+                pricechange = lastprice - price
+                percentage = (pricechange / lastprice) * -100
+                percentage = round(percentage)
+                print(name, "has increased from", lastprice, "to", price, "(", percentage, "%)")
+            input("\nPress [ENTER] to continue... ")
+        else:
+            pass
+
+
+def showPrices(HEADERS):
+    clear()
+    title()
+    print("Saved Price\tProduct\n")
+    products = os.scandir("products/")
+    for product in products:
+        file = open(product)
+        lines = file.read().splitlines()
+        lastline = lines[-1]
+        line = lastline.split("-")
+        price = line[6]
+        name = product.name.split(".txt")
+        print(price + "\t\t" + name[0])
+    input("\nPress [ENTER] to return to home... ")
+    home(HEADERS)
+
+
+def stopTracking(HEADERS):
+    clear()
+    title()
+    print("Product ID\tProduct\n")
+    num = 0
+    names = []
+    products = os.scandir("products/")
+    for product in products:
+        num = num + 1
+        name = product.name.split(".txt")
+        names.append(name[0])
+        print(num, "\t\t", name[0])
+    delete = int(input("\nEnter the number of a product to delete it: "))
+    delete = delete - 1
+    os.remove("products/" + names[delete] + ".txt")
+    home(HEADERS)
+
+
+def home(HEADERS):
+    clear()
+    title()
+    print("A) Start Tracking a New Product")
+    print("B) Update and Show Prices")
+    print("C) Stop Tracking a Product")
+    mode = input("\nChoose a Function: ")
     mode = mode.upper()
     if mode == "A":
-        clear()
-        title()
-        URL = input("Amazon URL: ")
-        url, name, price = productLookup(HEADERS, URL)
-        clear()
-        title()
-        print("Product:\t", name)
-        print("Price:\t\t", price)
-        time.sleep(2)
+        startTracking(HEADERS)
     elif mode == "B":
-        clear()
-        title()
-        URL = input("Amazon URL: ")
-        url, name, price = productLookup(HEADERS, URL)
-        newTrack(url, name, price)
+        updatePrices(HEADERS)
+        showPrices(HEADERS)
     elif mode == "C":
-        clear()
-        title()
-        autoUpdate(HEADERS)
+        stopTracking(HEADERS)
     else:
-        clear()
-        print("Invalid Mode Selection")
-        time.sleep(2)
+        home(HEADERS)
 
 
-while True:
-    main(HEADERS)
+def start(HEADERS):
+    updatePrices(HEADERS)
+    home(HEADERS)
+
+
+start(HEADERS)
